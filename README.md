@@ -1,3 +1,4 @@
 <h1>Welcome to FLAT FIELD</h1>
 
-Please bear with me
+<p style="color:blue;">Please bear with me</p>
+
