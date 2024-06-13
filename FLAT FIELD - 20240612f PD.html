@@ -1,0 +1,1274 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+    <title>FLAT FIELD</title>
+    <link rel="icon" type="image/x-icon" href="./ico/favicon.ico">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!---------------------------------------------------- 
+                        IMPORTS
+    ----------------------------------------------------->
+
+        <!-- Import Bootstrap CSS library -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+        <!-- Import jquery plugin -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+        <!-- Import Bootstrap plugin -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+        <!-- Import Leaflet CSS library -->
+        <link rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+        <!-- Import Leaflet.Control.FullScreen CSS library -->
+        <link rel="stylesheet" href="Control.FullScreen.css" />
+
+        <!-- Import Bauhaus Modern font -->
+        <link href="https://fonts.cdnfonts.com/css/bauhaus-modern" rel="stylesheet">
+
+        <!-- Import images data file -->
+        <script src = "./data/imagesData.js"></script>
+
+
+    <!---------------------------------------------------- 
+                        CSS
+    ----------------------------------------------------->
+
+        <!-- Body CSS -->
+        <style type="text/css">
+            body {
+                padding-top: 0px;
+                padding-bottom: 0px;
+            }
+        </style>
+
+        <!-- Initial modal CSS -->
+        <style type="text/css">
+            #initialModal {
+                background-color: rgba(0, 0, 0, 0.88);
+            }
+            .modal {
+                --bs-modal-border-radius: 30px;
+            }
+            .modal-content {
+                background-color: black;
+                border:darkred 3px solid;
+                color: lightgray;
+                text-align: center;
+                font-family: "Bauhaus Modern", sans-serif;
+                max-height: 2000px;
+            }
+            .modal-body {
+                font-size: large;
+            }
+            .modal-footer {
+                color: darkred;
+                font-weight: bold;
+                font-size: large;
+            }
+            .modal-header {
+                color: darkred;
+                font-weight: bold;
+                font-size: xx-large;
+            }
+        </style>
+
+        <!-- Legends CSS -->
+        <style type="text/css">
+            .legend {
+                padding: 1px 4px;
+                font: 12px Arial, Helvetica, sans-serif;
+                background: rgba(255, 255, 255, 0.7);
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+                border-radius: 5px;
+                line-height: 14px;
+                color: #555;
+            }
+            .legend heading {
+                position: relative;
+                text-align: center;
+                font-weight: bold;
+                bottom: 2px;
+            }
+            .legend span {
+                position: relative;
+                font-weight: bold;
+                bottom: 2px;
+            }
+            .legend i {
+                width: 18px;
+                height: 11px;
+                outline:solid black 1px;
+                border-radius: 3px;
+                float: left;
+                margin: 0px 4px 0 0;
+                opacity: 0.7;
+            }
+        </style>
+
+        <!-- Popups CSS -->
+        <style type="text/css">
+            .button-popup {
+                color: white;
+                --bs-btn-color: white;
+                --bs-btn-bg: darkred;
+                --bs-btn-border-color: darkred;
+                --bs-hover-color: white;
+                --bs-hover-bg: darkred;
+                --bs-btn-hover-border-color: darkred;
+                height: 25px;
+                width: 160px;
+                margin-top: 0px;
+                margin-bottom: -20px;
+                padding: 0px 0px;
+                --bs-btn-font-weight: 500;
+                --bs-btn-font-size: 0.85rem;
+                text-align: center;
+                opacity: 0.8;
+            }
+            .leaflet-popup-content {
+                max-width: 160px;
+                height: auto;
+            }
+            .leaflet-popup-content-wrapper {
+                background-color: black;
+                border: 3px solid darkred;
+                border-radius: 8px;
+                opacity: 0.8;
+            }
+            .leaflet-popup-tip {
+                background: darkred;
+            }
+        </style>
+
+        <!-- Quadrants CSS -->
+        <style type="text/css">
+            #map1 {
+                position: relative;
+                border: 1px solid black;
+                border-radius: 8px;
+                height: 50vh;  
+                width: 50%;  
+            }
+            #map2 {
+                position: relative;
+                border: 1px solid black;
+                border-radius: 8px;
+                height: 50vh;  
+                width: 50%;  
+            }
+            #map3 {
+                position: relative;
+                border: 1px solid black;
+                border-radius: 8px;
+                height: 50vh;  
+                width: 50%;  
+            }
+            #map4 {
+                position: relative;
+                border: 1px solid black;
+                border-radius: 8px;
+                height: 50vh;  
+                width: 50%;  
+            }
+            .quadLabel {
+                padding: 2px 4px 1px 4px;
+                font: 12px , Helvetica, sans-serif;
+                background: darkred;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+                border-radius: 5px;
+                line-height: 14px;
+            }
+            .quadLabel quadLabelText {
+                position: relative;
+                text-align: center;
+                font-family: "Bauhaus Modern", sans-serif;
+                font-weight: bold;
+                color: white;
+            }
+        </style>
+
+        <!-- Scale control CSS -->
+        <style type="text/css">
+            .leaflet-control-scale {
+                background-color: darkred;
+                opacity: 0.8;
+                font-weight: bold;
+            }
+        </style>
+
+
+    <!--------------------------------------------------
+            DISPLAY INITIAL MODAL WHEN PAGE LOADS
+    --------------------------------------------------->
+ 
+    <script>
+        $(document).ready(function(){
+            $("#initialModal").modal('show');
+        });
+    </script>
+
+
+</head>
+
+<body>
+
+
+    <!--------------------------------------------------
+                          CREATE DIVS
+    --------------------------------------------------->
+
+    <div class="container-fluid bg-danger px-0">
+
+        <!-- Initial Modal -->
+        <div id="initialModal" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <!-- Initial modal content -->
+                <div class="modal-content">
+                    <div class="modal-header text-center">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h1 class="modal-title w-100">FLAT FIELD</h1>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                    <div class="modal-body">
+                        <h5 class="text-center"><p><br>Fourfold Live Aggregation Tool<br><br>
+                            for<br><br>
+                            Fusing Imagery with Environmentally Layered Displays<br><br></p></h5>
+                    </div>
+                    <div class="modal-footer">
+                        <p>Pin the Flat Field (2024)<p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Modal -->
+        <div id="imageModal" class=" modal fade" tabindex="-1">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <!-- Initial modal content -->
+                <div class="modal-content">
+                    <div class="modal-header text-center">
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <img id="image-modal-image" src="./img/chickenburger.png" width=100%>
+                    </div>
+                    <div class="modal-footer">
+                        <p>Pin the Flat Field (2024)<p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            const myModal = document.querySelector('#imageModal');
+            myModal.addEventListener('show.bs.modal', function (event) {
+                // Get the reference of the triggering button 
+                const button = event.relatedTarget;
+                // Retrieve the filename of the image to enlarge from button's data attribute
+                const imageFilename = button.getAttribute('data-bs-image-filename');
+                const imageCoordinates = button.getAttribute('data-bs-image-coordinates');
+                // Set the modal image's src filename
+                document.getElementById("image-modal-image").src = imageFilename;
+                myModal.querySelector('.modal-footer').textContent = "(Latitude, Longitude) = (" + imageCoordinates + ")";
+            });
+        </script>
+
+        <!-- Quad display -->
+        <div class="row g-0 bg-dark">
+            <div id="map1" class="span6" style="border:2px solid darkred"></div>
+            <div id="map2" class="span6" style="border:2px solid darkred"></div>
+        </div>
+        <div class="row g-0 bg-dark">
+            <div id="map3" class="span6" style="border:2px solid darkred"></div>
+            <div id="map4" class="span6" style="border:2px solid darkred"></div>
+        </div>
+
+    </div>
+
+
+    <!--------------------------------------------------
+                IMPORT JAVASCRIPT AND PLUGINS
+    --------------------------------------------------->
+
+    <!-- Import Leaflet JavaScript library -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
+    
+    <!-- Import Leaflet.Sync plugin -->
+    <script src="./js/L.Map.Sync.js"></script>
+
+    <!-- Import Leaflet.Control.FullScreen plugin -->
+    <script src="./js/Control.FullScreen.js"></script>
+
+
+    <!--------------------------------------------------
+                      MAIN JAVASCRIPT
+    --------------------------------------------------->
+
+    <script type="text/javascript">
+
+
+        /*================================================
+                        BASE MAP DEFINITIONS
+         =================================================*/
+
+        // Greyscale base map 1
+        var grey1 = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                      	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                      	subdomains: 'abcd',
+                     	maxZoom: 20
+                    });
+
+        // Greyscale base map 2
+        var grey2 = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                      	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                      	subdomains: 'abcd',
+                     	maxZoom: 20
+                    });
+
+        // Greyscale base map 3
+        var grey3 = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                      	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                      	subdomains: 'abcd',
+                     	maxZoom: 20
+                    });
+
+        // Greyscale base map 4
+        var grey4 = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                      	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                      	subdomains: 'abcd',
+                     	maxZoom: 20
+                    });
+
+        // Open Street Map base map 1
+        var osm1 = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    })
+ 
+        // Open Street Map base map 2
+        var osm2 = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    })
+ 
+        // Open Street Map base map 3
+        var osm3 = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    })
+ 
+        // Open Street Map base map 4
+        var osm4 = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    })
+ 
+        // Google satellite base map 1
+        var satellite1 = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+                        maxZoom: 20,
+                        subdomains:['mt0','mt1','mt2','mt3']
+                    });
+
+        // Google satellite base map 2
+        var satellite2 = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+                        maxZoom: 20,
+                        subdomains:['mt0','mt1','mt2','mt3']
+                    });
+
+        // Google satellite base map 3
+        var satellite3 = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+                        maxZoom: 20,
+                        subdomains:['mt0','mt1','mt2','mt3']
+                    });
+
+        // Google satellite base map 4
+        var satellite4 = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+                        maxZoom: 20,
+                        subdomains:['mt0','mt1','mt2','mt3']
+                    });
+
+
+        /*================================================
+                        OVERLAY DEFINITIONS
+         =================================================*/
+     
+        // Satellite cloud observation (GOES-East Day Visibility) from MSC GeoMet (GeoMet-Weather)
+        var geometGOES_EastDayVisibility = L.tileLayer.wms("https://geo.weather.gc.ca/geomet", {
+            layers: 'GOES-East_1km_DayVis',
+            version: '1.3.0',
+            format: 'image/png',
+            transparent: true,
+            opacity: 0.5,
+            attribution: 'MSC GeoMet'
+        });
+
+        // North American composite weather radar (rain rate [mm/h]) from MSC GeoMet (GeoMet-Weather)
+        var geometWeatherRadarRainRate = L.tileLayer.wms("https://geo.weather.gc.ca/geomet", {
+            layers: 'RADAR_1KM_RRAI',
+            version: '1.3.0',
+            format: 'image/png',
+            transparent: true,
+            opacity: 0.5,
+            attribution: 'MSC GeoMet'
+        });
+
+        // North American composite weather radar (snow rate [cm/h]) from MSC GeoMet (GeoMet-Weather)
+        var geometWeatherRadarSnowRate = L.tileLayer.wms("https://geo.weather.gc.ca/geomet", {
+            layers: 'RADAR_1KM_RSNO',
+            version: '1.3.0',
+            format: 'image/png',
+            transparent: true,
+            opacity: 0.5,
+            attribution: 'MSC GeoMet'
+        });
+
+        // US weather radar from Nexrad
+        var nexradWeatherRadar = L.tileLayer.wms("http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi", {
+            layers: 'nexrad-n0r-900913',
+            format: 'image/png',
+            transparent: true,
+            attribution: "Weather data © 2012 IEM Nexrad"
+        });
+
+        // Canada Lightning Danger Map from MSC GeoMet (GeoMet-Weather)
+        var geometCanadaLightningDanger = L.tileLayer.wms("https://geo.weather.gc.ca/geomet", {
+            layers: 'Lightning_2.5km_Density',
+            version: '1.3.0',
+            format: 'image/png',
+            transparent: true,
+            opacity: 0.5,
+            attribution: 'MSC GeoMet'
+        });
+
+        // Canadian accumulated precipitation in last 24 hours at local noon from CWFIS
+        var precipitationLast24Hours = L.tileLayer.wms("https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?service=WMS", {
+            layers: 'precip_current',
+            format: 'image/png',
+            transparent: true,
+            opacity: 0.5,
+            attribution: 'CWFIS',
+        });
+
+        // Canadian relative humidity at local noon from CWFIS
+        var relativeHumidityAtNoon = L.tileLayer.wms("https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?service=WMS", {
+            layers: 'rh_current',
+            format: 'image/png',
+            transparent: true,
+            opacity: 0.5,
+            attribution: 'CWFIS',
+        });
+
+        // Canadian temperature at local noon from CWFIS
+        var temperatureAtNoon = L.tileLayer.wms("https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?service=WMS", {
+            layers: 'temp_current',
+            format: 'image/png',
+            transparent: true,
+            opacity: 0.5,
+            attribution: 'CWFIS',
+        });
+
+        // Canadian weather alerts from MSC GeoMet (GeoMet-Weather)
+        var weatherAlerts = L.tileLayer.wms("https://geo.weather.gc.ca/geomet/?lang=en&version=1.3.0", {
+            layers: 'ALERTS',
+            format: 'image/png',
+            transparent: true,
+            opacity: 0.5,
+            attribution: 'MSC GeoMet',
+        });
+
+//        // Canadian wind direction at local noon from CWFIS
+//        var windDirectionAtNoon = L.tileLayer.wms("https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?service=WMS", {
+//            layers: 'wdir_current',
+//            format: 'image/png',
+//            transparent: true,
+//            opacity: 0.5,
+//           attribution: 'CWFIS',
+//        });
+
+        // Canadian wind speed at local noon from CWFIS
+        var windSpeedAtNoon = L.tileLayer.wms("https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?service=WMS", {
+            layers: 'ws_current',
+            format: 'image/png',
+            transparent: true,
+            opacity: 0.5,
+            attribution: 'CWFIS',
+        });
+
+        // Canadian active wildfires status from CWFIS
+        var activeFiresStatus = L.tileLayer.wms("https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?service=WMS", {
+            layers: 'activefires_current',
+            format: 'image/png',
+            transparent: true,
+            opacity: 0.5,
+            attribution: 'CWFIS',
+        });
+
+        // Canadian active wildfire perimeters from CWFIS
+        var activeFirePerimeters = L.tileLayer.wms("https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?service=WMS", {
+            layers: 'm3_polygons_current',
+            format: 'image/png',
+            transparent: true,
+            opacity: 0.5,
+            attribution: 'CWFIS',
+        });
+
+        // Canadian current fire danger from CWFIS
+        var currentFireDanger = L.tileLayer.wms("https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?service=WMS", {
+            layers: 'fdr_current',
+            format: 'image/png',
+            transparent: true,
+            opacity: 0.5,
+            attribution: 'CWFIS',
+        });
+
+        // Canadian current fire weather index from CWFIS
+        var currentFireWeatherIndex = L.tileLayer.wms("https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?service=WMS", {
+            layers: 'fwi_current',
+            format: 'image/png',
+            transparent: true,
+            opacity: 0.5,
+            attribution: 'CWFIS',
+        });
+
+        // Canadian current head fire intensity from CWFIS
+        var currentHeadFireIntensity = L.tileLayer.wms("https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?service=WMS", {
+            layers: 'hfi_current',
+            format: 'image/png',
+            transparent: true,
+            opacity: 0.5,
+            attribution: 'CWFIS',
+        });
+
+        // Canadian current fire rate of spread from CWFIS
+        var currentFireRateOfSpread = L.tileLayer.wms("https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?service=WMS", {
+            layers: 'ros_current',
+            format: 'image/png',
+            transparent: true,
+            opacity: 0.5,
+            attribution: 'CWFIS',
+        });
+
+
+        /*================================================
+                        LEGEND DEFINITIONS
+         =================================================*/
+
+        /* Legend for Alerts overlay */
+        var legendAlerts = L.control({ position: "topright" });
+        legendAlerts.onAdd = function(map3) {
+            var div = L.DomUtil.create("div", "legend");
+            div.innerHTML += '<heading>Alerts</heading><br>';
+//            div.innerHTML += "<img src=\"https://geo.weather.gc.ca/geomet?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=ALERTS&format=image/png&STYLE=ALERTS&\">";
+            div.innerHTML += '<i style="background: #fd7d7c"></i><span>warning</span><br>';
+            div.innerHTML += '<i style="background: #fafa79"></i><span>watch</span><br>';
+            div.innerHTML += '<i style="background: #bdbdbc"></i><span>statement</span><br>';
+            div.innerHTML += '<i style="background: #bdbdbc"></i><span>advisory</span><br>';
+            return div;
+        };
+
+        /* Legend for Active fires (areas) overlay */
+        var legendActiveFiresAreas = L.control({ position: "topright" });
+        legendActiveFiresAreas.onAdd = function(map2) {
+            var div = L.DomUtil.create("div", "legend");
+            div.innerHTML += '<heading>Active fires (areas)</heading><br>';
+//            div.innerHTML += "<img src=\"https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?request=GetLegendGraphic&version=1.1.1&format=image/png&width=20&height=20&layer=activefires_current&\">";
+            div.innerHTML += '<i style="background: #ff9c99"></i><span>active fire area</span><br>';
+            return div;
+        };
+
+        /* Legend for Active fires (status) overlay */
+        var legendActiveFiresStatus = L.control({ position: "topright" });
+        legendActiveFiresStatus.onAdd = function(map2) {
+            var div = L.DomUtil.create("div", "legend");
+            div.innerHTML += '<heading>Active fires (status)</heading><br>';
+//            div.innerHTML += "<img src=\"https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?request=GetLegendGraphic&version=1.1.1&format=image/png&width=20&height=20&layer=activefires_current&\">";
+            div.innerHTML += '<i style="background: #FF0000"></i><span>out of control</span><br>';
+            div.innerHTML += '<i style="background: #FFFF00"></i><span>being held</span><br>';
+            div.innerHTML += '<i style="background: #79c8f4"></i><span>under control</span><br>';
+            return div;
+        };
+
+        /* Legend for Fire danger overlay */
+        var legendFireDanger = L.control({ position: "topright" });
+        legendFireDanger.onAdd = function(map2) {
+            var div = L.DomUtil.create("div", "legend");
+            div.innerHTML += '<heading>Fire danger</heading><br>';
+//            div.innerHTML += "<img src=\"https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?request=GetLegendGraphic&version=1.1.1&format=image/png&width=20&height=20&layer=fdr_current_shp&\">";
+            div.innerHTML += '<i style="background: #FF0000"></i><span>extreme</span><br>';
+            div.innerHTML += '<i style="background: #8d7028"></i><span>very high</span><br>';
+            div.innerHTML += '<i style="background: #FFFF00"></i><span>high</span><br>';
+            div.innerHTML += '<i style="background: #00e000"></i><span>moderate</span><br>';
+            div.innerHTML += '<i style="background: #0000FF"></i><span>low</span><br>';
+            return div;
+        };
+
+        /* Legend for Fire rate of spread overlay */
+        var legendFireRateOfSpread = L.control({ position: "topright" });
+        legendFireRateOfSpread.onAdd = function(map2) {
+            var div = L.DomUtil.create("div", "legend");
+            div.innerHTML += '<heading>Fire rate of spread</heading><br>';
+//            div.innerHTML += "<img src=\"https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?request=GetLegendGraphic&version=1.1.1&format=image/png&width=20&height=20&layer=fdr_current_shp&\">";
+            div.innerHTML += '<i style="background: #FF0000"></i><span>>25 m/min</span><br>';
+            div.innerHTML += '<i style="background: #8d7028"></i><span>18-25 m/min</span><br>';
+            div.innerHTML += '<i style="background: #FFFF00"></i><span>10-18 m/min</span><br>';
+            div.innerHTML += '<i style="background: #00e000"></i><span>3-10 m/min</span><br>';
+            div.innerHTML += '<i style="background: #2d8e2d"></i><span>1-3 m/min</span><br>';
+            div.innerHTML += '<i style="background: #0000FF"></i><span>0-1 m/min</span><br>';
+            return div;
+        };
+
+        /* Legend for Fire weather index overlay */
+        var legendFireWeatherIndex = L.control({ position: "topright" });
+        legendFireWeatherIndex.onAdd = function(map2) {
+            var div = L.DomUtil.create("div", "legend");
+            div.innerHTML += '<heading>Fire weather index</heading><br>';
+//            div.innerHTML += "<img src=\"https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?request=GetLegendGraphic&version=1.1.1&format=image%2Fpng&width=20&height=20&layer=fwi\">";
+            div.innerHTML += '<i style="background: #FF0000"></i><span>>30</span><br>';
+            div.innerHTML += '<i style="background: #8d7028"></i><span>20-30</span><br>';
+            div.innerHTML += '<i style="background: #FFFF00"></i><span>10-20</span><br>';
+            div.innerHTML += '<i style="background: #00e000"></i><span>5-10</span><br>';
+            div.innerHTML += '<i style="background: #0000FF"></i><span>0-5</span><br>';
+            return div;
+        };
+
+        /* Legend for Head fire intensity overlay */
+        var legendHeadFireIntensity = L.control({ position: "topright" });
+        legendHeadFireIntensity.onAdd = function(map2) {
+            var div = L.DomUtil.create("div", "legend");
+            div.innerHTML += '<heading>Head fire intensity</heading><br>';
+//            div.innerHTML += "<img src=\"https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?request=GetLegendGraphic&version=1.1.1&format=image/png&width=20&height=20&layer=hfi_current&\">";
+            div.innerHTML += '<i style="background: #FF0000"></i><span>>30000 kW/m</span><br>';
+            div.innerHTML += '<i style="background: #8d7028"></i><span>10000-30000 kW/m</span><br>';
+            div.innerHTML += '<i style="background: #FFFF00"></i><span>4000-10000 kW/m</span><br>';
+            div.innerHTML += '<i style="background: #00e000"></i><span>2000-4000 kW/m</span><br>';
+            div.innerHTML += '<i style="background: #2d8e2d"></i><span>500-2000 kW/m</span><br>';
+            div.innerHTML += '<i style="background: #00c0c0"></i><span>10-500 kW/m</span><br>';
+            div.innerHTML += '<i style="background: #0000FF"></i><span>0-10 kW/m/span><br>';
+            return div;
+        };
+
+        /* Legend for lightning density overlay */
+        var legendLightningDensity = L.control({ position: "topright" });
+        legendLightningDensity.onAdd = function(map1) {
+            var div = L.DomUtil.create("div", "legend");
+            div.innerHTML += '<heading>Lightning (last 10 min)</heading><br>';
+//            div.innerHTML += "<img src=\"https://geo.weather.gc.ca/geomet?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=Lightning_2.5km_Density&format=image/png&STYLE=Lightning&\">";
+            div.innerHTML += '<i style="background: #a30000"></i><span>> 2.0 flash/km^2/min</span><br>';
+            div.innerHTML += '<i style="background: #e51000"></i><span>1.8-2.0 flash/km^2/min</span><br>';
+            div.innerHTML += '<i style="background: #fe4c00"></i><span>1.6-1.8 flash/km^2/min</span><br>';
+            div.innerHTML += '<i style="background: #fead00"></i><span>1.4-1.6 flash/km^2/min</span><br>';
+            div.innerHTML += '<i style="background: #e1ec1c"></i><span>1.2-1.4 flash/km^2/min</span><br>';
+            div.innerHTML += '<i style="background: #96fd67"></i><span>1.0-1.2 flash/km^2/min</span><br>';
+            div.innerHTML += '<i style="background: #39fdc4"></i><span>0.8-1.0 flash/km^2/min</span><br>';
+            div.innerHTML += '<i style="background: #06cef7"></i><span>0.6-0.8 flash/km^2/min</span><br>';
+            div.innerHTML += '<i style="background: #005efe"></i><span>0.4-0.6 flash/km^2/min</span><br>';
+            div.innerHTML += '<i style="background: #0012e3"></i><span>0.2-0.4 flash/km^2/min</span><br>';
+            div.innerHTML += '<i style="background: #0000a3"></i><span>0.0-0.2 flash/km^2/min</span><br>';
+            return div;
+        };
+
+        /* Legend for precipitation (last 24 h) overlay */
+        var legendPrecipitationLast24H = L.control({ position: "topright" });
+        legendPrecipitationLast24H.onAdd = function(map4) {
+            var div = L.DomUtil.create("div", "legend");
+            div.innerHTML += '<heading>Precipitation (last 24 h)</heading><br>';
+//            div.innerHTML += "<img src=\"https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?request=GetLegendGraphic&version=1.1.1&format=image%2Fpng&width=20&height=20&layer=precip_current\">";
+            div.innerHTML += '<i style="background: #0000ff"></i><span>> 30 mm</span><br>';
+            div.innerHTML += '<i style="background: #20a0c0"></i><span>20-30 mm</span><br>';
+            div.innerHTML += '<i style="background: #00e080"></i><span>10-20 mm</span><br>';
+            div.innerHTML += '<i style="background: #00e000"></i><span>5-10 mm</span><br>';
+            div.innerHTML += '<i style="background: #008000"></i><span>0-5 mm</span><br>';
+            div.innerHTML += '<i style="background: #a9a9a9"></i><span>0 mm</span><br>';
+            return div;
+        };
+
+        /* Legend for rain rate (radar) overlay */
+        var legendRadarRainRate = L.control({ position: "topright" });
+        legendRadarRainRate.onAdd = function(map4) {
+            var div = L.DomUtil.create("div", "legend");
+            div.innerHTML += '<heading>Rain rate (radar)</heading><br>';
+//            div.innerHTML += "<img src=\"https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?request=GetLegendGraphic&version=1.1.1&format=image%2Fpng&width=20&height=20&layer=precip_current\">";
+            div.innerHTML += '<i style="background: #350051"></i><span>> 200 mm/h</span><br>';
+            div.innerHTML += '<i style="background: #ff0299"></i><span>100 mm/h</span><br>';
+            div.innerHTML += '<i style="background: #ff6600"></i><span>50 mm/h</span><br>';
+            div.innerHTML += '<i style="background: #ffcc00"></i><span>24 mm/h</span><br>';
+            div.innerHTML += '<i style="background: #006600"></i><span>12 mm/h</span><br>';
+            div.innerHTML += '<i style="background: #00cc00"></i><span>4 mm/h</span><br>';
+            div.innerHTML += '<i style="background: #0099ff"></i><span>1 mm/h</span><br>';
+            return div;
+        };
+
+        /* Legend for relative humidity at local noon overlay */
+        var legendRelativeHumidityNoon = L.control({ position: "topright" });
+        legendRelativeHumidityNoon.onAdd = function(map1) {
+            var div = L.DomUtil.create("div", "legend");
+            div.innerHTML += '<heading>Relative humidity (noon)</heading><br>';
+//            div.innerHTML += "<img src=\"https://cwfis.cfs.nrcan.gc.ca/geoserver/public/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=rh_current\">";
+            div.innerHTML += '<i style="background: #0000ff"></i><span>80-100%</span><br>';
+            div.innerHTML += '<i style="background: #00e000"></i><span>60-80%</span><br>';
+            div.innerHTML += '<i style="background: #ffff00"></i><span>40-60%</span><br>';
+            div.innerHTML += '<i style="background: #ddbc00"></i><span>20-40%</span><br>';
+            div.innerHTML += '<i style="background: #ff0000"></i><span>0-20%</span><br>';
+            return div;
+        };
+
+        /* Legend for temperature at local noon overlay */
+        var legendTemperatureNoon = L.control({ position: "topright" });
+        legendTemperatureNoon.onAdd = function(map1) {
+            var div = L.DomUtil.create("div", "legend");
+            div.innerHTML += '<heading>Temperature (noon)</heading><br>';
+//            div.innerHTML += "<img src=\"https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?request=GetLegendGraphic&version=1.1.1&format=image%2Fpng&width=20&height=20&layer=temp_current\">";
+            div.innerHTML += '<i style="background: #ff0000"></i><span>> 30 C</span><br>';
+            div.innerHTML += '<i style="background: #e0a000"></i><span>25-30 C</span><br>';
+            div.innerHTML += '<i style="background: #ffff00"></i><span>20-25 C</span><br>';
+            div.innerHTML += '<i style="background: #00e000"></i><span>10-20 C</span><br>';
+            div.innerHTML += '<i style="background: #008000"></i><span>0-10 C</span><br>';
+            div.innerHTML += '<i style="background: #0000ff"></i><span>< 0 C</span><br>';
+            return div;
+        };
+
+        /* Legend for wind speed at local noon overlay */
+        var legendWindSpeedNoon = L.control({ position: "topright" });
+        legendWindSpeedNoon.onAdd = function(map1) {
+            var div = L.DomUtil.create("div", "legend");
+            div.innerHTML += '<heading>Wind speed (noon)</heading><br>';
+//            div.innerHTML += "<img src=\"https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms?request=GetLegendGraphic&version=1.1.1&format=image%2Fpng&width=20&height=20&layer=ws_current\">";
+            div.innerHTML += '<i style="background: #ff0000"></i><span>> 25 km/h</span><br>';
+            div.innerHTML += '<i style="background: #e0a000"></i><span>20-25 km/h</span><br>';
+            div.innerHTML += '<i style="background: #ffff00"></i><span>15-20 km/h</span><br>';
+            div.innerHTML += '<i style="background: #00e000"></i><span>10-15 km/h</span><br>';
+            div.innerHTML += '<i style="background: #008000"></i><span>5-10 km/h</span><br>';
+            div.innerHTML += '<i style="background: #0000ff"></i><span>0-5 km/h</span><br>';
+            return div;
+        };
+
+        /* Legend for images overlay */
+        var legendImages = L.control({ position: "topright" });
+        legendImages.onAdd = function(map3) {
+            var div = L.DomUtil.create("div", "legend");
+            div.innerHTML += '<heading>Images</heading><br>';
+            div.innerHTML += '<i class="circle" style="border: solid 1px; border-radius: 4px; border-color: #000000; width: 9px; height: 9px; background: #8b0000"; display: inline-block;></i><span>image</span><br>'
+        //    div.innerHTML += '<i style="background: #8b0000"></i><span>image</span><br>';
+            return div;
+        };
+
+        /*================================================
+                           MAP PANELS
+         =================================================*/
+
+        // Initial parameters for map panels
+        var initialMapLat = 53.5;   // initial latitude
+        var initialMapLng = -94;    // initial longitude
+        var initialMapZoom = 4;     // initial zoom level
+        var minPanelZoom = 3
+        var initialMapCentre = [initialMapLat, initialMapLng];
+
+        // Set default base maps
+        var defaultBaseMap1 = satellite1;
+        var defaultBaseMap2 = osm2;
+        var defaultBaseMap3 = osm3;
+        var defaultBaseMap4 = grey4;
+
+        // Define map panel 1
+        var map1 = L.map('map1', {
+            layers: [defaultBaseMap1],
+            center: initialMapCentre,
+            zoom: initialMapZoom,
+            minZoom: minPanelZoom
+        });
+
+        // Define map panel 2
+        var map2 = L.map('map2', {
+            layers: [defaultBaseMap2],
+            center: initialMapCentre,
+            zoom: initialMapZoom,
+            zoomControl: false,
+            minZoom: minPanelZoom
+        });
+
+        // Define map panel 3
+        var map3 = L.map('map3', {
+            layers: [defaultBaseMap3],
+            center: initialMapCentre,
+            zoom: initialMapZoom,
+            zoomControl: false,
+            minZoom: minPanelZoom
+        });
+
+        // Define map panel 4
+        var map4 = L.map('map4', {
+            layers: [defaultBaseMap4],
+            center: initialMapCentre,
+            zoom: initialMapZoom,
+            zoomControl: false,
+            minZoom: minPanelZoom
+        });
+
+
+        /*================================================
+                        QUADRANT LABELS
+         =================================================*/
+
+        /* Map 1 quadrant label */
+        var quadrantLabel1 = L.control({ position: "bottomleft" });
+        quadrantLabel1.onAdd = function(map1) {
+            var div = L.DomUtil.create("div", "quadLabel");
+            div.innerHTML += '<quadLabelText>AIR</quadLabelText><br>';
+            return div;
+        };
+        quadrantLabel1.addTo(map1)
+
+        /* Map 2 quadrant label */
+        var quadrantLabel2 = L.control({ position: "bottomleft" });
+        quadrantLabel2.onAdd = function(map2) {
+            var div = L.DomUtil.create("div", "quadLabel");
+            div.innerHTML += '<quadLabelText>FIRE</quadLabelText><br>';
+            return div;
+        };
+        quadrantLabel2.addTo(map2)
+
+        /* Map 3 quadrant label */
+        var quadrantLabel3 = L.control({ position: "bottomleft" });
+        quadrantLabel3.onAdd = function(map3) {
+            var div = L.DomUtil.create("div", "quadLabel");
+            div.innerHTML += '<quadLabelText>LAND</quadLabelText><br>';
+            return div;
+        };
+        quadrantLabel3.addTo(map3)
+
+        /* Map 4 quadrant label */
+        var quadrantLabel4 = L.control({ position: "bottomleft" });
+        quadrantLabel4.onAdd = function(map4) {
+            var div = L.DomUtil.create("div", "quadLabel");
+            div.innerHTML += '<quadLabelText>WATER</quadLabelText><br>';
+            return div;
+        };
+        quadrantLabel4.addTo(map4)
+
+
+        /*================================================
+                        IMAGE POPUPS
+         =================================================*/
+
+        // Customize image markers
+         const imageMarkerOptions = {
+            color: "black",
+            fillColor: "darkred",
+            radius: 5,
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        };
+
+        // Create customized markers and popups from imported images data then display on map
+        var importedImagesData = L.geoJSON(imagesData, {
+            // Create custom markers
+            pointToLayer: function(feature, latlng) {
+                return L.circleMarker(latlng, imageMarkerOptions)
+            },
+
+            // Create popups
+            onEachFeature: function(feature, layer) {
+
+                // Popup content (image thumbnail)
+                const div = document.createElement("div");
+                div.innerHTML = "<img src='./img/" + layer.feature.properties.filename + "' style='width:160px;'>; <button type='button' class='btn button-popup'  data-bs-image-filename=./img/" + layer.feature.properties.filename + " data-bs-image-coordinates=" + layer.feature.geometry.coordinates + " data-bs-toggle='modal' data-bs-target='#imageModal'> Enlarge image</button>;" 
+                layer.bindPopup(div);
+
+                // Display popup when mouse is over marker
+                layer.on('mouseover', function (e) {
+                    this.openPopup(e.latlng);
+                });
+
+//                // Hide popup when mouse is not over marker or popup
+//                layer.on('mouseout', function (e) {
+//                    this.closePopup(e);
+//                });
+            }
+        })
+
+
+        /*================================================
+                        LAYER CONTROLLERS
+         =================================================*/
+
+        // List base maps to include in layer controller 1
+        var baseLayers1 = {
+            "Greyscale": grey1,
+            "Satellite": satellite1,
+            "Street": osm1
+        };
+
+        // List base maps to include in layer controller 2
+        var baseLayers2 = {
+            "Greyscale": grey2,
+            "Satellite": satellite2,
+            "Street": osm2
+        };
+
+        // List base maps to include in layer controller 3
+        var baseLayers3 = {
+            "Greyscale": grey3,
+            "Satellite": satellite3,
+            "Street": osm3
+        };
+
+        // List base maps to include in layer controller 4
+        var baseLayers4 = {
+            "Greyscale": grey4,
+            "Satellite": satellite4,
+            "Street": osm4
+        };
+
+        // List overlays to include in layer controller 1
+        var overlayLayers1 = {
+            "Cloud (daytime)": geometGOES_EastDayVisibility,
+            "Lightning (last 10 min)": geometCanadaLightningDanger,
+            "Relative humidity (noon)": relativeHumidityAtNoon,
+            "Temperature (noon)": temperatureAtNoon,
+//            "Wind direction (noon)": windDirectionAtNoon,
+            "Wind speed (noon)": windSpeedAtNoon
+        };
+
+        // List overlays to include in layer controller 2
+        var overlayLayers2 = {
+            "Active fires (areas)": activeFirePerimeters,
+            "Active fires (status)": activeFiresStatus,
+            "Fire danger": currentFireDanger,
+            "Fire rate of spread": currentFireRateOfSpread,
+            "Fire weather index": currentFireWeatherIndex,
+            "Head fire intensity": currentHeadFireIntensity
+        };
+
+        // List overlays to include in layer controller 3
+        var overlayLayers3 = {
+            "Alerts": weatherAlerts,
+            "Images": importedImagesData
+        };
+
+        // List overlays to include in layer controller 4
+        var overlayLayers4 = {
+            "Precipitation (last 24 h)": precipitationLast24Hours,
+            "Rain rate (radar)": geometWeatherRadarRainRate
+        };
+
+        // Add layer controllers to maps
+        var layerControl1 = L.control.layers(baseLayers1, overlayLayers1, { collapsed: true }).addTo(map1);
+        var layerControl2 = L.control.layers(baseLayers2, overlayLayers2, { collapsed: true }).addTo(map2);
+        var layerControl3 = L.control.layers(baseLayers3, overlayLayers3, { collapsed: true }).addTo(map3);
+        var layerControl4 = L.control.layers(baseLayers4, overlayLayers4, { collapsed: true }).addTo(map4);
+
+
+        /*================================================
+                        FULL SCREEN CONTROLS
+         =================================================*/
+
+        // Create a fullscreen control for each map
+        var fullScreenControl1 = L.control.fullscreen();
+        var fullScreenControl2 = L.control.fullscreen();
+        var fullScreenControl3 = L.control.fullscreen();
+        var fullScreenControl4 = L.control.fullscreen();
+
+        // Add a fullscreen control to each map
+        map1.addControl(fullScreenControl1);
+        map2.addControl(fullScreenControl2);
+        map3.addControl(fullScreenControl3);
+        map4.addControl(fullScreenControl4);
+
+        
+        /*================================================
+                        SCALE CONTROLS
+         =================================================*/
+
+         // Create and add a scale control for each map
+        var scaleControl1 = L.control.scale({imperial: false}).addTo(map1);
+        var scaleControl2 = L.control.scale({imperial: false}).addTo(map2);
+        var scaleControl3 = L.control.scale({imperial: false}).addTo(map3);
+        var scaleControl4 = L.control.scale({imperial: false}).addTo(map4);
+
+
+        /*================================================
+                        MAP SYNCHRONIZATION
+         =================================================*/
+
+        map1.sync(map2);
+        map1.sync(map3);
+        map1.sync(map4);
+        map2.sync(map1);
+        map2.sync(map3);
+        map2.sync(map4);
+        map3.sync(map1);
+        map3.sync(map2);
+        map3.sync(map4);
+        map4.sync(map1);
+        map4.sync(map2);
+        map4.sync(map3);
+
+
+        /*================================================
+                        OVERLAY EVENTS
+         =================================================*/
+
+        // MAP 1 //
+        
+            // Show legend when its associated overlay is added
+            map1.on('overlayadd', function(eventLayer){
+                if (eventLayer.name === 'Lightning (last 10 min)'){
+                    legendLightningDensity.addTo(map1);
+                } else if (eventLayer.name === 'Relative humidity (noon)'){
+                    legendRelativeHumidityNoon.addTo(map1);
+                } else if (eventLayer.name === 'Temperature (noon)'){
+                    legendTemperatureNoon.addTo(map1);
+                } else if (eventLayer.name === 'Wind speed (noon)'){
+                    legendWindSpeedNoon.addTo(map1);
+                }
+            });
+
+            // Remove legend when its associated overlay is removed
+            map1.on('overlayremove', function(eventLayer){
+                if (eventLayer.name === 'Lightning (last 10 min)'){
+                    legendLightningDensity.remove(map1);
+                } else if (eventLayer.name === 'Relative humidity (noon)'){
+                    legendRelativeHumidityNoon.remove(map1);
+                } else if (eventLayer.name === 'Temperature (noon)'){
+                    legendTemperatureNoon.remove(map1);
+                } else if (eventLayer.name === 'Wind speed (noon)'){
+                    legendWindSpeedNoon.remove(map1);
+                }
+            }); 
+
+        // MAP 2 // 
+        
+            // Show legend when its associated overlay is added
+            map2.on('overlayadd', function(eventLayer){
+                if (eventLayer.name === 'Active fires (areas)'){
+                    legendActiveFiresAreas.addTo(map2);
+                } else if (eventLayer.name === 'Active fires (status)'){
+                    legendActiveFiresStatus.addTo(map2);
+                } else if (eventLayer.name === 'Fire danger'){
+                    legendFireDanger.addTo(map2);
+                } else if (eventLayer.name === 'Fire rate of spread'){
+                    legendFireRateOfSpread.addTo(map2);
+                } else if (eventLayer.name === 'Fire weather index'){
+                    legendFireWeatherIndex.addTo(map2);
+                } else if (eventLayer.name === 'Head fire intensity'){
+                    legendHeadFireIntensity.addTo(map2);
+                } 
+            });
+
+            // Remove legend when its associated overlay is removed
+            map2.on('overlayremove', function(eventLayer){
+                if (eventLayer.name === 'Active fires (areas)'){
+                    legendActiveFiresAreas.remove(map2);
+                } else if (eventLayer.name === 'Active fires (status)'){
+                    legendActiveFiresStatus.remove(map2);
+                } else if (eventLayer.name === 'Fire danger'){
+                    legendFireDanger.remove(map2);
+                } else if (eventLayer.name === 'Fire rate of spread'){
+                    legendFireRateOfSpread.remove(map2);
+                } else if (eventLayer.name === 'Fire weather index'){
+                    legendFireWeatherIndex.remove(map2);
+                } else if (eventLayer.name === 'Head fire intensity'){
+                    legendHeadFireIntensity.remove(map2);
+                }
+            }); 
+
+        // MAP 3 //
+        
+            // Show legend when its associated overlay is added
+            map3.on('overlayadd', function(eventLayer){
+                if (eventLayer.name === 'Alerts'){
+                    legendAlerts.addTo(map3);
+                } else if (eventLayer.name === 'Images'){
+                    legendImages.addTo(map3);
+                } 
+            });
+
+            // Remove legend when its associated overlay is removed
+            map3.on('overlayremove', function(eventLayer){
+                if (eventLayer.name === 'Alerts'){
+                    legendAlerts.remove(map3);
+                } else if (eventLayer.name === 'Images'){
+                    legendImages.remove(map3);
+                }
+            }); 
+
+        // MAP 4 //
+        
+            // Show legend when its associated overlay is added
+            map4.on('overlayadd', function(eventLayer){
+                if (eventLayer.name === 'Precipitation (last 24 h)'){
+                    legendPrecipitationLast24H.addTo(map4);
+                } else if (eventLayer.name === 'Rain rate (radar)'){
+                    legendRadarRainRate.addTo(map4);
+                }
+            });
+
+            // Remove legend when its associated overlay is removed
+            map4.on('overlayremove', function(eventLayer){
+                if (eventLayer.name === 'Precipitation (last 24 h)'){
+                    legendPrecipitationLast24H.remove(map4);
+                } else if (eventLayer.name === 'Rain rate (radar)'){
+                    legendRadarRainRate.remove(map4);
+                }
+            }); 
+
+
+        /*================================================
+                    ACTIVATE INITIAL OVERLAYS
+         =================================================*/
+
+        // Map 1 initial overlays
+        geometGOES_EastDayVisibility.addTo(map1)
+        
+        // Map 2 initial overlays
+        activeFirePerimeters.addTo(map2)
+        activeFiresStatus.addTo(map2)
+
+        // Map 3 initial overlays
+        weatherAlerts.addTo(map3)
+        importedImagesData.addTo(map3)
+
+        // Map 4 initial overlays
+        geometWeatherRadarRainRate.addTo(map4)
+
+
+
+
+
+
+
+
+// Trying to construct a WMS GetFeatureInfo request from MSC according to their specification here: https://eccc-msc.github.io/open-data/msc-geomet/wms_en/
+// Both attempts include a console.log() call that puts echoes the HTML GetFeatureInfo request sent to the server to the browser's
+// developer's console.  You can copy it and paste it into a browser to see whether or not the server responds.
+// Both attempts 1 & 2 below yield the same response from the server:
+
+// {
+// "type": "FeatureCollection",
+// "name": "ALERTS",
+// "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::3857" } },
+// "features": [
+// 
+// ]
+// }
+
+// So, it looks like both attempts are providing all the necessary information and the server is providing in response the requested
+// geojson file for the ALERTS layer but it contains no features.
+// So, the question is whether there is something wrong with:
+// a) the GetFeatureInfo request itself,
+// b) the Javascript computations that are input to the GetFeatureInfo request, or
+// c) the map/mouse interface.
+
+// ATTEMPT 1
+// To that end, trying to adapt the code by Paul Crickard that is mentioned here: https://www.e-education.psu.edu/geog585/node/766
+//map3.addEventListener('click', onMapClick);
+//popup = new L.Popup({maxWidth: 400});
+//function onMapClick(e) {
+//    var wmsURL = 'https://geo.weather.gc.ca/geomet?';
+//    var SERVICE = 'WMS';
+//    var VERSION = '1.3.0';
+//    var REQUEST = 'GetFeatureInfo';
+//    var LAYERS = 'ALERTS';
+//    var QUERY_LAYERS = 'ALERTS';
+//    var CRS = 'EPSG:3857';
+//    var latlngStr = '(' + e.latlng.lat.toFixed(3) + ')';
+//    var BBOX = map3.getBounds()._southWest.lat+","+map3.getBounds()._southWest.lng+","+map3.getBounds()._northEast.lat+","+map3.getBounds()._northEast.lng;
+//    var BBOX = map3.getBounds()._southWest.lng+","+map3.getBounds()._southWest.lat+","+map3.getBounds()._northEast.lng+","+map3.getBounds()._northEast.lat;
+//    var WIDTH = map3.getSize().x;
+//    var HEIGHT = map3.getSize().y;
+//    var X = map3.layerPointToContainerPoint(e.layerPoint).x;
+//    var Y = map3.layerPointToContainerPoint(e.layerPoint).y;
+//    var INFO_FORMAT = 'application/json';
+//    var htmlRequest = wmsURL+'&SERVICE='+SERVICE+'&VERSION='+VERSION+'&REQUEST='+REQUEST+'&BBOX='+BBOX+'&CRS='+CRS+'&WIDTH='+WIDTH+'&HEIGHT='+HEIGHT+'&LAYERS='+LAYERS+'&INFO_FORMAT='+INFO_FORMAT+'&QUERY_LAYERS='+QUERY_LAYERS+'&I='+X+'&J='+Y;
+//    console.log("HTML Request = " + htmlRequest);
+//    popup.setLatLng(e.latlng);
+//    popup.setContent("<iframe src=' "+htmlRequest+"' width='160' height='100' frameborder='0'></iframe>");
+//    map3.openPopup(popup);
+//}
+
+
+// ATTEMPT 2
+// Trying to adapt the code from this blog post: https://nimgis.wordpress.com/2018/02/07/the-journey-begins/
+//    var wmsUrl = 'https://geo.weather.gc.ca/geomet?';
+//    var layers = "ALERTS";
+//
+//    function identify (e,layers) {
+//   var BBOX = map3.getBounds().toBBoxString(); 
+//   var WIDTH = map3.getSize().x; 
+//   var HEIGHT = map3.getSize().y; 
+//   var X = Math.round(map3.layerPointToContainerPoint(e.layerPoint).x); 
+//   var Y = Math.round(map3.layerPointToContainerPoint(e.layerPoint).y); 
+////   var getUrl = wmsUrl+'SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo'+'&layers='+layers+'&BBOX='+BBOX+'&FEATURE_COUNT=5&info_format=application/json&HEIGHT='+HEIGHT+'&WIDTH='+WIDTH+'&query_layers='+layers+'&SRS=EPSG:4326&X='+X+'&Y='+Y;
+//   var getUrl = wmsUrl+'SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo'+'&LAYERS=ALERTS&BBOX='+BBOX+'&FEATURE_COUNT=5&info_format=application/json&HEIGHT='+HEIGHT+'&WIDTH='+WIDTH+'&query_layers=ALERTS&CRS=EPSG:3857&X='+X+'&Y='+Y;
+//
+//console.log(getUrl);
+//
+//$.ajax({
+//   url: getUrl,
+//   success: function (data, status, xhr) {
+//      var result = data; //all the GetFeatureInfo result compiled into one json file
+//      var txt ="";
+//      for (i=0; i<result.features.length; i++) {
+//         txt = txt.concat(""+result.features[i].id.split('.')[0].toUpperCase()+ ":"+ '' + formatFeaturecontent(result.features[i]) + ''); //JSON.stringify(result.features[i].properties) - get ALL Data
+//      };
+// 
+//   if (txt != ""){
+//      L.popup()
+//      .setLatLng(e.latlng)
+//      .setContent(txt)
+//      .openOn(map);
+//    }
+// 
+//   },
+//   error: function (xhr, status, error) {
+//     console.log(error);
+//   }
+// });
+// }   
+
+// function formatFeaturecontent(featureJSON) {
+//   layerName = featureJSON.id.split('.')[0]; //Remove everything after the period in the layer name
+//   switch(layerName) { //Extract only relevant data for each layer finding
+//      case "countries":
+//         return "Name: "+featureJSON.properties.sovereignt + ""+ "Type: "+ featureJSON.properties.type+""+ "Population Estimate: "+ featureJSON.properties.pop_est.toLocaleString()+""+ "Income Group: "+ featureJSON.properties.income_grp+"";
+//      case "ne_10m_roads":
+//         return "Road Name: "+featureJSON.properties.name + ""+ "Length in KM: "+ featureJSON.properties.length_km+""+ "Road Type: "+ featureJSON.properties.type+""+ "Country: "+ featureJSON.properties.sov_a3+""+ "Continent: "+ featureJSON.properties.continent;
+//      default:
+//         return JSON.stringify(featureJSON.properties);
+//   }
+// }
+//
+// function getLayerNames(clickedLocation) {
+//    var layersUrl =[];
+//    var layers = clickedLocation.target._layers
+//    for (var layer in layers){
+//        if (layers[layer]._url==wmsUrl) {
+//            layersUrl.push(layers[layer].options.layers);
+//        }
+//
+//console.log("layers: " + layers);
+//
+//    };
+// return layersUrl.toLocaleString();
+//}
+//
+//var clickLocation; 
+//map3.on('click', function(e) {
+//   clickedLocation=e;
+//   layers=getLayerNames(e);
+//   identify(e, layers);
+//});
+
+
+
+    </script>
+</body>
+</html>
