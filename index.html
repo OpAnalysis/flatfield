@@ -489,9 +489,6 @@
             attribution: 'MSC GeoMet',
         });
 
-
-
-
         // Canadian weather alerts from MSC GeoMet (GeoMet-Weather)
         var weatherAlerts = L.tileLayer.wms("https://geo.weather.gc.ca/geomet/?lang=en&version=1.3.0", {
             layers: 'ALERTS',
@@ -623,6 +620,14 @@
             return div;
         };
 
+        /* Legend for clouds (daytime) overlay */
+        var legendCloudDaytime = L.control({ position: "topright" });
+        legendCloudDaytime.onAdd = function(map3) {
+            var div = L.DomUtil.create("div", "legend");
+            div.innerHTML += '<heading>Cloud (daytime)</heading><br>';
+            div.innerHTML += '<i style="background: "lightgray"></i><span>coverage</span><br>';
+            return div;
+        };
         /* Legend for Fire danger overlay */
         var legendFireDanger = L.control({ position: "topright" });
         legendFireDanger.onAdd = function(map2) {
@@ -699,6 +704,15 @@
             div.innerHTML += '<i style="background: #005efe"></i><span>0.4-0.6 flash/km^2/min</span><br>';
             div.innerHTML += '<i style="background: #0012e3"></i><span>0.2-0.4 flash/km^2/min</span><br>';
             div.innerHTML += '<i style="background: #0000a3"></i><span>0.0-0.2 flash/km^2/min</span><br>';
+            return div;
+        };
+
+        /* Legend for Met Notes overlay */
+        var legendMetNotes = L.control({ position: "topright" });
+        legendMetNotes.onAdd = function(map3) {
+            var div = L.DomUtil.create("div", "legend");
+            div.innerHTML += '<heading>Met notes</heading><br>';
+            div.innerHTML += '<i style="background: #a5cdfc"></i><span>applicability</span><br>';
             return div;
         };
 
@@ -902,8 +916,8 @@
          =================================================*/
 
         // Fetch air quality GeoJSON
-        var currentAirQuality = new L.GeoJSON.AJAX("https://api.weather.gc.ca/collections/aqhi-observations-realtime/items?f=json", {
-            pointToLayer: function(feature, latlng) {
+            var currentAirQuality = new L.GeoJSON.AJAX("https://api.weather.gc.ca/collections/aqhi-observations-realtime/items?f=json&latest=true", {
+                pointToLayer: function(feature, latlng) {
                 return L.circleMarker(latlng, imageMarkerOptions)
             },
 
@@ -912,7 +926,7 @@
 
                 // Popup content (image thumbnail)
                 const div = document.createElement("div");
-                div.innerHTML = "AQHI: " + layer.feature.properties.aqhi + "<br>Location: " + layer.feature.properties.location_name_en + "<br> Time/Date: " + layer.feature.properties.observation_datetime_text_en;
+                div.innerHTML = "<center>AQHI: " + layer.feature.properties.aqhi + "</center><br>Location: " + layer.feature.properties.location_name_en + "<br> Time/Date: " + layer.feature.properties.observation_datetime_text_en;
                 layer.bindPopup(div);
 
                 // Display popup when mouse is over marker
@@ -939,7 +953,7 @@
             radius: 5,
             weight: 1,
             opacity: 1,
-            fillOpacity: 0.8
+            fillOpacity: 0.8            
         };
 
         // Create customized markers and popups from imported images data then display on map
@@ -961,13 +975,36 @@
                 layer.on('mouseover', function (e) {
                     this.openPopup(e.latlng);
                 });
-
-//                // Hide popup when mouse is not over marker or popup
-//                layer.on('mouseout', function (e) {
-//                    this.closePopup(e);
-//                });
             }
         })
+
+
+        /*================================================
+                        MET NOTES POPUPS
+         =================================================*/
+
+        // Define style for MET NOTE polygons
+        function metNotePolygonStyle(feature) {
+            return {
+                weight: 1,
+                fillOpacity: 0.1
+            }
+        };
+
+        // Fetch Met Notes GeoJSON
+        var metNotes = new L.GeoJSON.AJAX("https://api.weather.gc.ca/collections/metnotes/items?f=json", {
+
+            // Apply style to each polygon
+            style: metNotePolygonStyle,
+
+            // Create popups
+            onEachFeature: function(feature, layer) {
+                // Popup content (image thumbnail)
+                const div = document.createElement("div");
+                div.innerHTML = "<center>MET NOTE</center><br><center>Status: "+ layer.feature.properties.metnote_status + "</center> <p align='justify'>" + layer.feature.properties.content_en + "</p>";
+                layer.bindPopup(div);
+            }
+        });
 
 
         /*================================================
@@ -1026,8 +1063,13 @@
         // List overlays to include in layer controller 3
         var overlayLayers3 = {
             "Alerts": weatherAlerts,
-            "Images": importedImagesData
+            "Images": importedImagesData,
+            "Met notes": metNotes
         };
+        // Set zindex for each layer
+        importedImagesData.setZIndex(650);
+        weatherAlerts.setZIndex(250);
+        metNotes.setZIndex(100);
 
         // List overlays to include in layer controller 4
         var overlayLayers4 = {
@@ -1039,7 +1081,7 @@
         // Add layer controllers to maps
         var layerControl1 = L.control.layers(baseLayers1, overlayLayers1, { collapsed: true }).addTo(map1);
         var layerControl2 = L.control.layers(baseLayers2, overlayLayers2, { collapsed: true }).addTo(map2);
-        var layerControl3 = L.control.layers(baseLayers3, overlayLayers3, { collapsed: true }).addTo(map3);
+        var layerControl3 = L.control.layers(baseLayers3, overlayLayers3, { collapsed: true, autoZIndex: true }).addTo(map3);
         var layerControl4 = L.control.layers(baseLayers4, overlayLayers4, { collapsed: true }).addTo(map4);
 
 
@@ -1099,6 +1141,8 @@
             map1.on('overlayadd', function(eventLayer){
                 if (eventLayer.name === 'Air Quality Health Index'){
                     legendAirQuality.addTo(map1);
+                } else if (eventLayer.name === 'Cloud (daytime)'){
+                    legendCloudDaytime.addTo(map1);
                 } else if (eventLayer.name === 'Lightning (last 10 min)'){
                     legendLightningDensity.addTo(map1);
                 } else if (eventLayer.name === 'Relative humidity (noon)'){
@@ -1114,6 +1158,8 @@
             map1.on('overlayremove', function(eventLayer){
                 if (eventLayer.name === 'Air Quality Health Index'){
                     legendAirQuality.remove(map1);
+                } else if (eventLayer.name === 'Cloud (daytime)'){
+                    legendCloudDaytime.remove(map1);
                 } else if (eventLayer.name === 'Lightning (last 10 min)'){
                     legendLightningDensity.remove(map1);
                 } else if (eventLayer.name === 'Relative humidity (noon)'){
@@ -1169,6 +1215,8 @@
                     legendAlerts.addTo(map3);
                 } else if (eventLayer.name === 'Images'){
                     legendImages.addTo(map3);
+                } else if (eventLayer.name === 'Met notes'){
+                    legendMetNotes.addTo(map3);
                 } 
             });
 
@@ -1178,6 +1226,8 @@
                     legendAlerts.remove(map3);
                 } else if (eventLayer.name === 'Images'){
                     legendImages.remove(map3);
+                } else if (eventLayer.name === 'Met notes'){
+                    legendMetNotes.remove(map3);
                 }
             }); 
 
@@ -1211,9 +1261,10 @@
          =================================================*/
 
         // Map 1 initial overlays
+        currentAirQuality.addTo(map1)
         geometGOES_EastDayVisibility.addTo(map1)
-        currentAirQuality.addTo(map1);
-    
+        temperatureAtNoon.addTo(map1)
+        
         // Map 2 initial overlays
         activeFirePerimeters.addTo(map2)
         activeFiresStatus.addTo(map2)
@@ -1227,5 +1278,6 @@
 
 
     </script>
+
 </body>
 </html>
