@@ -61,7 +61,7 @@
                 color: lightgray;
                 text-align: center;
                 font-family: "Bauhaus Modern", sans-serif;
-                max-height: 2000px;
+                max-height: 2400px;
             }
             .modal-body {
                 font-size: large;
@@ -123,8 +123,8 @@
                 --bs-btn-hover-border-color: darkred;
                 height: 25px;
                 width: 160px;
-                margin-top: 0px;
-                margin-bottom: -20px;
+                margin-top: 15px;
+                margin-bottom: 0px;
                 padding: 0px 0px;
                 --bs-btn-font-weight: 500;
                 --bs-btn-font-size: 0.85rem;
@@ -278,7 +278,7 @@
                 const imageDatetime = button.getAttribute('data-bs-image-datetime');
                 // Set the modal image's src filename
                 document.getElementById("image-modal-image").src = imageFilename;
-                myModal.querySelector('.modal-footer').textContent = "(Latitude, Longitude) = (" + imageCoordinates + ")";
+                myModal.querySelector('.modal-footer').textContent = "Date: " +imageDatetime + "   //   (Latitude, Longitude) = (" + imageCoordinates + ")";
             });
         </script>
 
@@ -968,7 +968,7 @@
 
                 // Popup content (image thumbnail)
                 const div = document.createElement("div");
-                div.innerHTML = "<img src='./img/" + layer.feature.properties.filename + "' style='width:160px;'>; <button type='button' class='btn button-popup' data-bs-image-filename=./img/" + layer.feature.properties.filename + " data-bs-image-coordinates=" + layer.feature.geometry.coordinates + " data-bs-image-datetime=" + layer.feature.properties.datetime + " data-bs-toggle='modal' data-bs-target='#imageModal'> Enlarge image</button>;" 
+                div.innerHTML = "<img src='./img/" + layer.feature.properties.filename + "' style='width:160px'> <button type='button' class='btn button-popup' data-bs-image-filename=./img/" + layer.feature.properties.filename + " data-bs-image-coordinates=" + layer.feature.geometry.coordinates + " data-bs-image-datetime=" + layer.feature.properties.datetime + " data-bs-toggle='modal' data-bs-target='#imageModal'> Enlarge image</button>" 
                 layer.bindPopup(div);
 
                 // Display popup when mouse is over marker
